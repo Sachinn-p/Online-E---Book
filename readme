@@ -2,12 +2,12 @@ Flask Microservices with PostgreSQL & JWT (Windows)
 Overview
 
 Two microservices:
-
+---------------------
 Login Service – User registration & login (JWT).
-
 Shopping Service – Products & cart management.
 
 Setup (Windows)
+-------------------
 1. Login Service
 cd login_service
 python -m venv venv
@@ -15,19 +15,16 @@ venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
 
-
 Runs on port 5000
-
 DB: logindb
 
 2. Shopping Service
+-----------------------
 cd shopping_service
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
 
-
 Runs on port 5001
-
 DB: shoppingdb
