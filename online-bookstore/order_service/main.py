@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, validator
 from datetime import datetime
 from database import SessionLocal, engine
 from models import Order, OrderItem
@@ -28,22 +28,19 @@ class OrderItemCreate(BaseModel):
     quantity: int
     price: float
     
-    @field_validator('book_id')
-    @classmethod
+    @validator('book_id')
     def book_id_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('Book ID must be greater than 0')
         return v
     
-    @field_validator('quantity')
-    @classmethod
+    @validator('quantity')
     def quantity_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('Quantity must be greater than 0')
         return v
     
-    @field_validator('price')
-    @classmethod
+    @validator('price')
     def price_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('Price must be greater than 0')
@@ -53,15 +50,13 @@ class OrderCreate(BaseModel):
     user_id: int
     items: List[OrderItemCreate]
     
-    @field_validator('user_id')
-    @classmethod
+    @validator('user_id')
     def user_id_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('User ID must be greater than 0')
         return v
     
-    @field_validator('items')
-    @classmethod
+    @validator('items')
     def items_must_not_be_empty(cls, v):
         if not v:
             raise ValueError('Order must contain at least one item')

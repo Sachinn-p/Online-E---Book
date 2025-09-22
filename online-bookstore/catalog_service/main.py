@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, validator
 from decimal import Decimal
 from database import SessionLocal, engine
 from models import Book
@@ -33,15 +33,13 @@ class BookCreate(BaseModel):
     class Config:
         str_strip_whitespace = True
     
-    @field_validator('price')
-    @classmethod
+    @validator('price')
     def price_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('Price must be greater than 0')
         return v
     
-    @field_validator('stock_quantity')
-    @classmethod
+    @validator('stock_quantity')
     def stock_must_be_non_negative(cls, v):
         if v < 0:
             raise ValueError('Stock quantity cannot be negative')
