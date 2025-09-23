@@ -16,6 +16,7 @@ passlib[bcrypt]==1.7.4
 
 # HTTP requests
 requests==2.31.0
+httpx==0.25.2
 
 # Additional utilities
 python-dotenv==1.0.0

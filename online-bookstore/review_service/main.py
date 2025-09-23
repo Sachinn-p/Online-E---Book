@@ -1,19 +1,24 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
+import time
 from database import SessionLocal, engine
 from models import Review
 import models
 from shared_auth import require_auth
+from shared_logging import MicroserviceLogger
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 print("✅ Review Service database tables created successfully!")
 
 app = FastAPI(title="Review Service", version="1.0.0")
+
+# Initialize logger
+logger = MicroserviceLogger("review_service")
 
 # Dependency to get database session
 def get_db():
@@ -166,10 +171,26 @@ def delete_review(review_id: int, current_user: dict = Depends(require_auth), db
     return {"message": "Review deleted successfully", "review_id": review_id}
 
 @app.get("/health")
-def health_check():
+def health_check(request: Request):
     """Health check endpoint - public"""
-    return {"status": "healthy", "service": "review_service"}
+    start_time = time.time()
+    status_code = 200
+    response_data = {"status": "healthy", "service": "review_service"}
+    
+    execution_time = (time.time() - start_time) * 1000
+    logger.log_request(
+        endpoint="/health",
+        method="GET",
+        status_code=status_code,
+        user_id=None,
+        request_data=None,
+        response_data=response_data,
+        error_message=None,
+        execution_time_ms=execution_time
+    )
+    
+    return response_data
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8006)
+    uvicorn.run(app, host="0.0.0.0", port=8007)

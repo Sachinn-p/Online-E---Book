@@ -1,18 +1,23 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel
 from datetime import datetime
+import time
 from database import SessionLocal, engine
 from models import Notification
 import models
 from shared_auth import require_auth
+from shared_logging import MicroserviceLogger
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 print("✅ Notification Service database tables created successfully!")
 
 app = FastAPI(title="Notification Service", version="1.0.0")
+
+# Initialize logger
+logger = MicroserviceLogger("notification_service")
 
 # Dependency to get database session
 def get_db():
@@ -101,10 +106,26 @@ def delete_notification(notification_id: int, current_user: dict = Depends(requi
     return {"message": "Notification deleted successfully"}
 
 @app.get("/health")
-def health_check():
+def health_check(request: Request):
     """Health check endpoint - public"""
-    return {"status": "healthy", "service": "notification_service"}
+    start_time = time.time()
+    status_code = 200
+    response_data = {"status": "healthy", "service": "notification_service"}
+    
+    execution_time = (time.time() - start_time) * 1000
+    logger.log_request(
+        endpoint="/health",
+        method="GET",
+        status_code=status_code,
+        user_id=None,
+        request_data=None,
+        response_data=response_data,
+        error_message=None,
+        execution_time_ms=execution_time
+    )
+    
+    return response_data
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8005)
+    uvicorn.run(app, host="0.0.0.0", port=8006)
